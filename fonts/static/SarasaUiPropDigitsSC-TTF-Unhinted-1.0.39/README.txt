@@ -16,10 +16,9 @@ Weights:
 
 Each weight has an upright and Italic file. ASCII digits are proportional by
 default; OpenType tnum restores tabular digits, and pnum maps tabular digits
-back to proportional digits. Static TTFs reuse Inter/Sarasa's retained calt
-data for contextual colon raising, so numeric-adjacent contexts such as 1:2,
-1:a, a:2, and 1::2 may raise ':', while plain alphabetic text such as a:b is
-left alone.
+back to proportional digits. Static TTFs and VFs use Inter-compatible calt
+data for contextual colon raising: 1:2 raises ':', 1:a and a:2 do not, and
+colon runs such as 1::2 follow Inter's colon-run behavior.
 
 The name table includes Simplified Chinese display names, such as
 更纱黑体 Ui PropDigits SC ExtraLight.
@@ -31,11 +30,15 @@ They keep a static STAT table for modern weight/italic style recognition; this
 does not make the static TTFs variable fonts.
 GSUB/GPOS FeatureRecord order, Script/LangSys coverage, and the base lookup
 structure are templated from the corresponding upstream Sarasa Ui SC static
-font for each style; the static digit-colon behavior does not add its own
-lookup.
-Simple glyf overlap flags are cleared at final write-out for OTS/web-font
-compatibility; this changes the raw glyf encoding flag only, not coordinates
-or TrueType instructions.
+font for each style.
+Exact static styles preserve upstream simple glyph flags, glyf bounding boxes,
+and composite component names for non-digit/non-colon cmap glyphs. Static TTFs
+use post format 2 so these glyph names remain stable after the default
+proportional digits are remapped onto U+0030..U+0039. The final glyf write
+keeps upstream OVERLAP_SIMPLE semantics and uses OTS-compatible repeat encoding
+for repeated overlap flags instead of clearing bit 6. The
+unhinted OTS maxZones/gasp warnings are inherited from the upstream unhinted
+baseline and pass with return code 0.
 Glyph counts are not padded to match upstream; cmap glyphs and layout-reachable
 unencoded glyphs are preserved, while unreachable glyph count differences are
 left as build artifacts.
